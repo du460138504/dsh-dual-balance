@@ -60,27 +60,43 @@ dsh-plugin  deepseek-harness  deepseek  workbuddy  sidebar
 
 ---
 
-## 第 3 步：发布到 npm
+## 第 3 步：发布到 npm —— ✅ 已完成
 
-`package.json` 里的 `private` 字段**已经移除**，可以直接发布。
+**已发布**：https://www.npmjs.com/package/dsh-dual-balance （`dsh-dual-balance@0.1.0`，tag 为 `latest`，MIT）
+
+打包内容经 `--dry-run` 核对：9 个文件、57.3 kB —— `lib/`、`cordis.patch.yml`、`assets/1.png` 和四份文档，无多余内容。
+
+已做**真实端到端安装测试**：
+
+- 干净目录 `npm install dsh-dual-balance` → 9 个文件完整，入口齐全，`ModuleLoader` 协议保留
+- 隔离 profile `dsh plugin --profile web add dsh-dual-balance` → 以 `^0.1.0` 真实版本依赖装入，登记进 `bundles`，退出码 0
+
+### 踩到的坑：npm 强制 2FA 才能发布
+
+首次 `npm publish` 报 **403**：
+
+```
+Two-factor authentication or granular access token with bypass 2fa
+enabled is required to publish packages.
+```
+
+**登录成功不代表能发布。** npm 现在的策略是：发布必须通过账号 2FA 或勾选了 bypass 2FA 的 Granular Access Token 之一。只做普通密码/浏览器登录会被拒。
+
+解决办法（已采用）：在 npm 账号设置里开启 2FA（Authorization and Publishing），发布时用验证器或指纹确认。
+
+> **这条值得记住**：以后任何 npm 账号要先开 2FA 再发第一个包，否则会在最后一步撞墙。
+
+### 版本升级时
 
 ```sh
-npm login          # 没有账号先去 npmjs.com 注册
-npm publish --dry-run   # 先看会打包哪些文件，确认没有多余内容
+npm version patch   # 或 minor / major，会自动改 package.json 并打 git tag
+git push --follow-tags
 npm publish
 ```
 
-`--dry-run` 的输出里应该只有 `lib/`、`cordis.patch.yml`、`assets/`、几个 README/CHANGELOG 和 LICENSE。**如果看到别的文件，先停下来检查 `files` 字段。**
+**同时更新 `CHANGELOG.md`。** `package.json` 的 `version` 与 CHANGELOG 最新条目必须一致。
 
-发布后别人就能用最干净的方式安装：
-
-```sh
-dsh plugin --profile desktop add dsh-dual-balance
-```
-
-**发布完成后，记得回到两份 README 删掉「尚未发布」的警告块**，把 npm 小节提回首选位置——那才是用户最省事的方式（不需要懂 `git+https://` 这类协议细节）。
-
-> 如果 npm 上 `dsh-dual-balance` 这个名字被占用，改 `package.json` 的 `name`（比如加 `-plugin` 后缀），同时更新所有 README 里的安装命令。
+> 如果日后要改用别的包名，记得同步更新两份 README 的安装命令。
 
 ---
 
