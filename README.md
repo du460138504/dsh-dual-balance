@@ -67,7 +67,7 @@ dsh plugin --profile desktop add git+https://github.com/du460138504/dsh-dual-bal
 
 | 插件版本 | 要求的 DSH 核心 | 可选依赖 |
 |---|---|---|
-| `0.1.0`（当前） | `0.2.0-rc.2` | `dsh-workbuddy-connect`（可选，缺失时降级） |
+| `0.1.1`（当前） | `0.2.0-rc.2` | `dsh-workbuddy-connect`（可选，缺失时降级） |
 
 插件只依赖两个 DSH 客户端能力——账户余额 remote 与侧栏 slot，都是 DSH 的稳定公开接口，不读取私有文件、不注入 hook。
 

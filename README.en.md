@@ -67,7 +67,7 @@ Restart DSH after installing; the two rows appear at the bottom of the sidebar.
 
 | Plugin version | Required DSH core | Optional dependency |
 |---|---|---|
-| `0.1.0` (current) | `0.2.0-rc.2` | `dsh-workbuddy-connect` (optional; falls back when absent) |
+| `0.1.1` (current) | `0.2.0-rc.2` | `dsh-workbuddy-connect` (optional; falls back when absent) |
 
 The plugin uses only two DSH client capabilities — the account balance remote and a sidebar slot — both public, stable interfaces. It reads no private files and patches no internals.
 

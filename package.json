@@ -1,7 +1,8 @@
 {
   "name": "dsh-dual-balance",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "DSH Dual Balance",
+  "author": "du460138504",
   "description": "在 DSH 侧栏底部同时显示 DeepSeek 官方余额与 WorkBuddy 积分余额 — show DeepSeek balance and WorkBuddy credits together in the DeepSeek Harness sidebar.",
   "keywords": [
     "dsh-plugin",
