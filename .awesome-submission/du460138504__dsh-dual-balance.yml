@@ -1,0 +1,6 @@
+url: https://github.com/du460138504/dsh-dual-balance
+name: du460138504/dsh-dual-balance
+category: usage
+description:
+  en: Shows the DeepSeek account balance and the WorkBuddy credits side by side in one DSH sidebar-footer block, refreshing both every 60 seconds and degrading to a dash when WorkBuddy is absent or signed out.
+  zh: 在 DSH 侧栏底部同一区域内并排显示 DeepSeek 官方余额与 WorkBuddy 剩余积分，每 60 秒刷新；WorkBuddy 未安装或未登录时对应一行降级为短横线。
