@@ -70,7 +70,7 @@ npm publish --dry-run   # 先看会打包哪些文件，确认没有多余内容
 npm publish
 ```
 
-`--dry-run` 的输出里应该只有 `lib/`、`cordis.patch.yml`、几个 README/CHANGELOG 和 LICENSE。**如果看到别的文件，先停下来检查 `files` 字段。**
+`--dry-run` 的输出里应该只有 `lib/`、`cordis.patch.yml`、`assets/`、几个 README/CHANGELOG 和 LICENSE。**如果看到别的文件，先停下来检查 `files` 字段。**
 
 发布后别人就能用最干净的方式安装：
 
@@ -78,23 +78,26 @@ npm publish
 dsh plugin --profile desktop add dsh-dual-balance
 ```
 
+**发布完成后，记得回到两份 README 删掉「尚未发布」的警告块**，把 npm 小节提回首选位置——那才是用户最省事的方式（不需要懂 `git+https://` 这类协议细节）。
+
 > 如果 npm 上 `dsh-dual-balance` 这个名字被占用，改 `package.json` 的 `name`（比如加 `-plugin` 后缀），同时更新所有 README 里的安装命令。
 
 ---
 
-## 第 4 步：截图（这一步比代码更影响别人是否安装）
+## 第 4 步：截图 —— ✅ 已完成
 
-README 目前**没有截图**，这是最大的短板。人对两个数字的 UI 没有想象力，看不到图就不会装。
+截图已就位：`assets/1.png`（873×144，从侧栏原生分辨率放大 3 倍）。
 
-拍一张：侧栏底部清晰显示两行余额，可以适当打码具体金额但保留格式。
+**裁图时特意去掉了底部的用户名行**——那是个人信息，不该出现在公开 README 里。留下的只有两行余额：`DeepSeek ¥0.14 +¥0.52` 与 `WorkBuddy 2,299.00`，正好展示了赠金拆分和千分位格式这两个最有说服力的细节。
 
-保存为 `assets/1.png`，然后在 `README.md` 和 `README.en.md` 的功能列表下方各插入一行：
+两份 README 的功能列表下方已各插入一行引用，`package.json` 的 `files` 也已加入 `assets`（否则 npm 包里图会 404）。
 
-```markdown
-![侧栏底部的双余额显示](assets/1.png)
-```
+### 以后要换图
 
-截图放进仓库后，记得把它加进 `package.json` 的 `files` 数组（如果希望随 npm 包分发）或保持仅仓库内可见。
+重新截一张侧栏底部的图，替换 `assets/1.png` 即可，README 无需改动。注意：
+
+- 保留金额格式（`¥8.91`、`12,340.00` 这种形态才是卖点），需要的话可以打码具体数字
+- **裁掉用户名和其他会话/工作区信息**——那些不该公开
 
 ---
 
@@ -133,6 +136,22 @@ Issues 是零成本、不暴露隐私的选择，起步阶段完全够用。但�
 1. **给 `dsh-workbuddy-connect` 提一个 PR 或 issue**，提议在它的 README「相关插件」一节里互相链接。你有天然理由：本插件依赖它的状态路由。这也是最精准的流量来源——看那个仓库的人正好就是你的目标用户。
 2. **在 DSH 用户社区发一帖**（Discord / 论坛 / 相关群组），标题写清楚痛点和效果，附截图。
 3. **在小红书 / 掘金等平台写一篇短文**：《我给 DSH 写了个插件，侧栏一眼看到两边余额》。技术选型、`roundDown` 截断这种细节是很好的内容素材。
+
+---
+
+## 第 3.5 步：真实安装测试 —— ✅ 已完成，并发现一个坑
+
+在隔离的 `DSH_HOME` 里做过一次端到端测试（不碰你正在用的 desktop profile）。结果：
+
+**通过的项目**：clone 内容完整（13 文件含图片）、`package.json` 可解析、`main`/`bundle.patch`/`exports` 指向的文件都存在、`files` 数组全部存在、`lib/client.js` 保留 `__ModuleLoader__` 协议、`lib/index.js` 导出 `name`/`inject`/`apply`、`dsh plugin add` 安装成功并登记进 `bundles`。
+
+**发现的坑（已修复）**：`dsh plugin add github:user/repo` 会被 pnpm 解析成 **SSH 地址**（`git+ssh://git@github.com/...`），**没配 SSH 密钥的用户会直接失败**。而 README 原本把这条当作主推安装方式。
+
+已改为推荐 `git+https://` 前缀写法，并保留 SSH 简写作为「已配置密钥」的备选。两份 README 均已同步。
+
+> **这条经验值得记住**：DSH 插件的 `github:` 简写默认走 SSH。分享任何插件安装命令时，先确认对方有没有配 SSH 密钥——否则第一条命令就会报错。
+
+**未能验证**：npm 发布流程（本机未装 npm）、`github:` 协议的完整安装（测试沙箱禁止创建管道且拿不到 TLS 凭据，连 `git ls-remote` 都跑不了）。这两项需要你在真实环境确认。
 
 ---
 

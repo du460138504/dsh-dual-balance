@@ -43,18 +43,32 @@ DSH 里通常同时挂着两套账号：DSH 自己的 DeepSeek 官方账号（�
 
 前置：已安装 DeepSeek Harness。**不装 `dsh-workbuddy-connect` 也能用**——那样只会显示 DeepSeek 余额，WorkBuddy 一行显示 `—`。
 
-```sh
-# Web profile
-dsh plugin --profile web add dsh-dual-balance
+### 从 GitHub 安装（当前推荐）
 
+```sh
 # Desktop profile
-dsh plugin --profile desktop add dsh-dual-balance
+dsh plugin --profile desktop add git+https://github.com/du460138504/dsh-dual-balance.git
+
+# Web profile
+dsh plugin --profile web add git+https://github.com/du460138504/dsh-dual-balance.git
 ```
 
-从 GitHub 源码安装：
+**务必带上 `git+https://` 前缀。** 写成 `github:du460138504/dsh-dual-balance` 会被解析成 SSH 地址（`git+ssh://git@github.com/...`），没配置 SSH 密钥的话会直接报错。
+
+如果你已经配置了 GitHub SSH 密钥，也可以用简写：
 
 ```sh
 dsh plugin --profile desktop add github:du460138504/dsh-dual-balance
+```
+
+> **首次安装可能需要允许构建脚本。** 如果报错提到 `allowBuilds`，按它给出的路径编辑 profile 下的 `pnpm-workspace.yaml`，然后重跑安装命令。
+
+### 从 npm 安装
+
+> ⚠️ **尚未发布。** 本插件目前只在 GitHub 上，下面的命令要等首次 `npm publish` 之后才可用。
+
+```sh
+dsh plugin --profile desktop add dsh-dual-balance
 ```
 
 安装后重启 DSH，侧栏底部即出现两行余额。

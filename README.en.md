@@ -51,10 +51,32 @@ dsh plugin --profile web add dsh-dual-balance
 dsh plugin --profile desktop add dsh-dual-balance
 ```
 
-From GitHub source:
+### From GitHub (currently recommended)
+
+```sh
+# Desktop profile
+dsh plugin --profile desktop add git+https://github.com/du460138504/dsh-dual-balance.git
+
+# Web profile
+dsh plugin --profile web add git+https://github.com/du460138504/dsh-dual-balance.git
+```
+
+**Keep the `git+https://` prefix.** Writing `github:du460138504/dsh-dual-balance` resolves to an SSH address (`git+ssh://git@github.com/...`) and fails outright without an SSH key configured.
+
+If you do have GitHub SSH keys set up, the shorthand works too:
 
 ```sh
 dsh plugin --profile desktop add github:du460138504/dsh-dual-balance
+```
+
+> **The first install may need build scripts allowed.** If the error mentions `allowBuilds`, edit `pnpm-workspace.yaml` in the profile directory it names, then re-run the install command.
+
+### From npm
+
+> ⚠️ **Not published yet.** The plugin currently lives only on GitHub; the command below works after the first `npm publish`.
+
+```sh
+dsh plugin --profile desktop add dsh-dual-balance
 ```
 
 Restart DSH after installing; the two rows appear at the bottom of the sidebar.
