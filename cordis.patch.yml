@@ -1,0 +1,5 @@
+# Mount the dual-balance host half. The host half does nothing on its own:
+# it exists so the bundle has a mount point, and all UI lives in ./client.
+- insert:
+    - id: ui-dual-balance
+      name: dsh-dual-balance

@@ -1,0 +1,14 @@
+# 统一换行符：仓库内一律存 LF，检出时按平台习惯转换。
+# 没有这一行，Windows 提交的文件会让 Linux/macOS 用户 clone 下来看到整文件 diff。
+* text=auto eol=lf
+
+# 明确文本类型
+*.js   text
+*.json text
+*.md   text
+*.yml  text
+
+# 二进制资源不做转换
+*.png  binary
+*.jpg  binary
+*.ico  binary
