@@ -21,6 +21,8 @@ This plugin pins both numbers to the sidebar foot and refreshes them every 60 se
 
 ## Features
 
+![Both balances in the sidebar foot](assets/1.png)
+
 - **Two numbers, one glance**: `DeepSeek` shows the account balance (shown as `¥8.91 +¥2.00` when a bonus is present); `WorkBuddy` shows total remaining credits.
 - **Bilingual**: follows the DSH language setting automatically.
 - **Hover for detail**: the tooltip breaks down top-up versus granted balance, explains where the WorkBuddy figure comes from, and reports a signed-out state.
