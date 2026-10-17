@@ -1,6 +1,6 @@
 {
   "name": "dsh-dual-balance",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "DSH Dual Balance",
   "author": "du460138504",
   "description": "在 DSH 侧栏底部同时显示 DeepSeek 官方余额与 WorkBuddy 积分余额 — show DeepSeek balance and WorkBuddy credits together in the DeepSeek Harness sidebar.",
@@ -41,6 +41,11 @@
   },
   "homepage": "https://github.com/du460138504/dsh-dual-balance#readme",
   "bugs": "https://github.com/du460138504/dsh-dual-balance/issues",
+  "peerDependencies": {
+    "@deepseek-ai/dsh-api-remotes": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-locale": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-renderer": "^0.2.0-rc.2"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"

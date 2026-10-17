@@ -2,6 +2,15 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.2] - 2026-10-17
+
+适配 DeepSeek Harness 0.2.1。
+
+### 新增
+
+- 声明 `peerDependencies`：`@deepseek-ai/dsh-api-remotes`、`@deepseek-ai/dsh-client-locale`、`@deepseek-ai/dsh-client-ui-renderer`，范围均为 `^0.2.0-rc.2`。此前完全不声明 peer，宿主因此不做任何兼容性检查——接口若真的变化，插件只会在浏览器里静默降级（余额显示 `—`），而不是由宿主提前明确报出不兼容。声明之后，跨次版本的变化会在启动时被拦下。
+- 三项依赖与使用的 `sidebar.footer.action` 插槽、`remote.account.getBalance` 接口在 0.2.1-rc.2 中均已核对仍然存在。
+
 ## [0.1.1] - 2026-02-14
 
 ### 变更
@@ -22,5 +31,6 @@
 - 降级处理：WorkBuddy 插件缺失 / 未登录 / 计费报错时显示 `—` 或 `未登录`，不影响 DeepSeek 一行。
 - 金额格式化对齐平台规则：两位小数截断（`roundDown`）、不足一分显示 `<¥0.01`、千分位分隔、基于十进制字符串运算避免浮点误差。
 
+[0.1.2]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.2
 [0.1.1]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.1
 [0.1.0]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.0
