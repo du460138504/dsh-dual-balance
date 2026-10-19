@@ -2,6 +2,22 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.3] - 2026-10-19
+
+自带更新提醒。
+
+### 新增
+
+- **自更新提醒**。启动时向本插件自己的 host 路由 `/plugins/dsh-dual-balance/update-check` 询问 npm 上是否有更新版本；有则通过 `shell.overlay` 插槽弹出提示，与侧栏余额块并存。
+- **「更新」按钮**：host 侧执行 `dsh plugin --profile <当前 profile> add dsh-dual-balance@<版本>`，成功后提示完全退出并重启 DSH。
+- **「以后更新」按钮**：只关闭本次会话的提示，不写入任何存储——**下次启动会再次提醒**。
+- host 侧不再只是挂载点：`apply` 由空实现改为注册两条路由。
+
+### 安全
+
+- 两条路由都要求 loopback 的 Host（及浏览器附带的 Origin），拒绝 DNS rebinding 页面。
+- 只允许安装 npm 上**确实是 latest** 的版本号；请求体同样做语义化版本校验。
+
 ## [0.1.2] - 2026-10-17
 
 适配 DeepSeek Harness 0.2.1。
@@ -31,6 +47,7 @@
 - 降级处理：WorkBuddy 插件缺失 / 未登录 / 计费报错时显示 `—` 或 `未登录`，不影响 DeepSeek 一行。
 - 金额格式化对齐平台规则：两位小数截断（`roundDown`）、不足一分显示 `<¥0.01`、千分位分隔、基于十进制字符串运算避免浮点误差。
 
+[0.1.3]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.3
 [0.1.2]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.2
 [0.1.1]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.1
 [0.1.0]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.0
