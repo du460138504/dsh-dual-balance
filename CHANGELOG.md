@@ -2,6 +2,21 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.4] - 2026-10-20
+
+支持 WorkBuddy 国际版：装了哪个 App 就显示哪一行。
+
+### 新增
+
+- **`WorkBuddy AI` 行**。国内版与国际版是两套独立账号与积分，本插件此前只读国内版的 `/plugins/dsh-workbuddy-connect/status`。现在同时读取国际版的 `/plugins/dsh-workbuddy-connect/ai/status`，两个变体并行轮询。
+- **App 安装探测路由** `/plugins/dsh-dual-balance/workbuddy-apps`。状态路由把「这个 App 没装」和「装了但没登录」都报成同一个 `no-credential`，光看它无法区分，所以改由 host 侧检查安装痕迹：Windows 下依次看 `C:\Program Files\<App>`、`C:\Program Files (x86)\<App>`、`%LOCALAPPDATA%\Programs\<App>`，再加上 Electron 的 userData 目录（`%APPDATA%\<App>`，App 跑过一次就会创建）；macOS 看 `/Applications` 与 `~/Applications`。
+
+### 变更
+
+- **行数按 App 安装情况决定**。装了国内版就有一行，再装国际版就多一行；只有 DeepSeek 一处账号时就只有一行。已安装但未登录的 App 显示「未登录」，而不是让整行消失；App 没装则整行不出现。
+- WorkBuddy 变体的读取从「固定返回一行、失败时显示占位」改为「没有可用数据就不出现」，避免给未接入的 App 留一行 `—`。
+- 首次渲染先假定国内版已安装（两行），等探测结果回来后再修正，避免每次启动都从一行跳到两行。
+
 ## [0.1.3] - 2026-10-19
 
 自带更新提醒。
@@ -47,6 +62,7 @@
 - 降级处理：WorkBuddy 插件缺失 / 未登录 / 计费报错时显示 `—` 或 `未登录`，不影响 DeepSeek 一行。
 - 金额格式化对齐平台规则：两位小数截断（`roundDown`）、不足一分显示 `<¥0.01`、千分位分隔、基于十进制字符串运算避免浮点误差。
 
+[0.1.4]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.4
 [0.1.3]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.3
 [0.1.2]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.2
 [0.1.1]: https://github.com/du460138504/dsh-dual-balance/releases/tag/v0.1.1
