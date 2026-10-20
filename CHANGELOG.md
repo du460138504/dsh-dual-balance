@@ -2,6 +2,16 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.6] - 2026-10-21
+
+修复国际版被误判为「未安装」。
+
+### 修复
+
+- **磁盘探测不再只看 C 盘**。上一版把「安装根目录」写死成 `%ProgramFiles%`、`%ProgramFiles(x86)%`、`%LOCALAPPDATA%\Programs`，等于假设程序只装在系统盘。把 WorkBuddy AI 装到 `D:\Program Files\WorkBuddyAI` 时，探测找不到就把这一行吞了。现在枚举所有固定驱动器（跳过 A:/B:，避免软驱阻塞）下的 `Program Files`、`Program Files (x86)`、`Programs`，结果缓存 30 秒。
+- **目录名不再只认一种拼写**。国际版在 Windows 上装进 `WorkBuddyAI`（无空格），界面里却叫 `WorkBuddy AI`（有空格）；之前只探后者，于是永远匹配不上。现在 `WorkBuddyAI`、`WorkBuddy AI`、`workbuddy-ai` 都试。
+- **空目录不再冒充安装**。程序目录里必须找到启动器（`WorkBuddy.exe` / `WorkBuddyAI.exe`）、`resources/app.asar` 或 `install-manifest.json` 才算数，升级暂存树或卸载残留不会被当成已安装；用户数据目录（`%APPDATA%\<App>`）仍按「跑过即装过」处理。
+
 ## [0.1.5] - 2026-10-20
 
 修复「更新」按钮在 Windows 上安装失败。
