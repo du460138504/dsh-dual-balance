@@ -2,6 +2,15 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.5] - 2026-10-20
+
+修复「更新」按钮在 Windows 上安装失败。
+
+### 修复
+
+- **不再经由 cmd.exe 启动 CLI**。此前用 `cmd /d /s /c <dsh.cmd> …` 调用，而 `cmd /s /c` 会剥掉最外层引号——安装路径含空格时（例如 `D:\Program Files\deepseek harness\`）路径被截断，命令无从查找，结果是 `'dsh' is not recognized` 加退出码 1。现在直接以 Node 模式启动应用自带的运行时（`process.execPath --expose-internals <cli.js>`，环境变量 `ELECTRON_RUN_AS_NODE=1`），与 `dsh.cmd` 内部的做法一致，彻底绕开 shell 的引号规则。
+- 找不到 CLI 时，错误信息里直接给出可手动执行的 `dsh plugin add <name>@<version>`。
+
 ## [0.1.4] - 2026-10-20
 
 支持 WorkBuddy 国际版：装了哪个 App 就显示哪一行。
