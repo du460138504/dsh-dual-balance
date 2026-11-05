@@ -2,6 +2,25 @@
 
 本项目所有值得注意的变更都记录在此。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.1.7] - 2026-11-05
+
+不再依赖 dsh-workbuddy-connect，WorkBuddy 积分改由本插件 host 侧直读计费接口，并保留小数。
+
+### 新增
+
+- **Host 侧自取 WorkBuddy 积分**。新增两条 loopback 路由 `/plugins/dsh-dual-balance/workbuddy-credits` 与 `…/ai`，取代原先调用 `dsh-workbuddy-connect` 状态路由的做法。请求一次的处理链：定位登录文档 `<user-data>/CodeBuddyExtension/Data/Public/auth/<file>` → 若 `accessToken` 是 AES-256-GCM 信封，则借助 WorkBuddy 自带 Electron 二进制暴露的 at-rest 密钥解密 → 以 `Bearer` 调 `/v2/billing/meter/get-user-resource`（个人账号）或 `/v2/billing/meter/get-enterprise-user-usage`（CN 企业账号）→ 汇总各套餐剩余。
+- **凭据读取范围与安装探测共用同一套枚举根目录**。at-rest 密钥候选遍历所有已枚举驱动器的程序目录，并覆盖 `WorkBuddyAI` / `WorkBuddy AI` / `workbuddy-ai` 三种目录拼写，因此非系统盘安装也能取到密钥。
+
+### 变更
+
+- **积分显示带小数**。此前依赖 `dsh-workbuddy-connect` 返回的整积分；现在汇总计费接口的 `…Precise` 全精度字段，按两位小数截断（截断而非四舍五入，千分位分隔，不显示尚未发放的积分），与 WorkBuddy 桌面端面板一致。
+- **不再需要 `dsh-workbuddy-connect`**。装了也不影响；没装则 WorkBuddy 一行照常从本插件自己的路由取数，只有确实未登录时才显示「未登录」。
+
+### 安全
+
+- 两条 credits 路由与既有路由同样要求 loopback 的 Host（及浏览器附带的 Origin），拒绝 DNS rebinding 页面。
+- 解密得到的 AES 密钥按信封 `keyId` 缓存在本进程内存，access token 不计落盘，插件不写入任何文件。
+
 ## [0.1.6] - 2026-10-21
 
 修复国际版被误判为「未安装」。

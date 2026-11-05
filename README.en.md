@@ -15,7 +15,7 @@ When you run tasks on WorkBuddy credits but still want to know how much is left 
 
 ## Why
 
-A DSH install usually has two accounts behind it: the DeepSeek account DSH itself uses (billed by DeepSeek), and the WorkBuddy account brought in through [dsh-workbuddy-connect](https://github.com/corrinehu/dsh-workbuddy-connect) (billed in app credits). The two balances live on different settings pages, so it is easy to run one of them dry mid-task.
+A DSH install usually has two accounts behind it: the DeepSeek account DSH itself uses (billed by DeepSeek), and the WorkBuddy desktop account (billed in app credits). The two balances live on different settings pages, so it is easy to run one of them dry mid-task.
 
 This plugin pins both numbers to the sidebar foot and refreshes them every 60 seconds.
 
@@ -26,7 +26,7 @@ This plugin pins both numbers to the sidebar foot and refreshes them every 60 se
 - **Two numbers, one glance**: `DeepSeek` shows the account balance (shown as `¥8.91 +¥2.00` when a bonus is present); `WorkBuddy` shows total remaining credits.
 - **Bilingual**: follows the DSH language setting automatically.
 - **Hover for detail**: the tooltip breaks down top-up versus granted balance, explains where the WorkBuddy figure comes from, and reports a signed-out state.
-- **Degrades gracefully**: if the WorkBuddy plugin is missing, signed out, or its billing call fails, that row shows `signed out` or `—`. The other row keeps working, and **DSH will not fail to start**.
+- **Degrades gracefully**: if the WorkBuddy desktop app is not installed, its row does not appear; if it is installed but signed out, the row shows `signed out`; if the billing call fails, it shows `—`. The DeepSeek row keeps working regardless, and **DSH will not fail to start**.
 - **Amounts formatted the way the platforms do**: see below.
 
 ## Formatting details
@@ -35,13 +35,13 @@ Neither number is a careless `toFixed(2)`. Each deliberately mimics its own sour
 
 **DeepSeek balance** renders with the platform's two-decimal truncation (`roundDown`), not rounding. A balance of `0.148` shows as `0.14` on the official page and as `¥0.14` here — never `0.15`. A sub-cent balance collapses to `<¥0.01`, because an on-screen `¥0.00` reads as "empty" when a little is in fact left.
 
-**WorkBuddy credits** are truncated the same way. Upstream already reports two decimals, so anything beyond that is binary floating-point noise; this truncates rather than rounds, and **never shows credit that has not been granted**.
+**WorkBuddy credits** are truncated the same way. The billing API returns both an integer field and a full-precision `…Precise` field per package; this plugin sums the precise values, then truncates to two decimals — truncating rather than rounding, and **never showing credit that has not been granted**.
 
 Both paths work on decimal strings, avoiding binary rounding error.
 
 ## Install
 
-Requires DeepSeek Harness. **`dsh-workbuddy-connect` is optional** — without it you still get the DeepSeek balance, with `—` on the WorkBuddy row.
+Requires DeepSeek Harness. **No `dsh-workbuddy-connect` needed** — the plugin reads the WorkBuddy desktop credentials and billing API itself.
 
 ```sh
 # Web profile
@@ -67,20 +67,18 @@ Restart DSH after installing; the two rows appear at the bottom of the sidebar.
 
 | Plugin version | Required DSH core | Optional dependency |
 |---|---|---|
-| `0.1.1` (current) | `0.2.0-rc.2` | `dsh-workbuddy-connect` (optional; falls back when absent) |
+| `0.1.7` (current) | `0.2.0-rc.2` | None (reads credentials and billing itself; no `dsh-workbuddy-connect`) |
 
-The plugin uses only two DSH client capabilities — the account balance remote and a sidebar slot — both public, stable interfaces. It reads no private files and patches no internals.
+The browser side uses only two DSH client capabilities — the account balance remote and a sidebar slot — both public, stable interfaces. On the host side it reads the WorkBuddy desktop sign-in document and calls that app's billing API; that is the sole source of the WorkBuddy row.
 
 ## How it works
 
-The whole feature is browser-side. The host half, `lib/index.js`, has a **deliberately empty** `apply()`: it exists only because a profile bundle is mounted through a patch entry, which needs a mount point.
+It renders into the `sidebar.footer.action` slot at `order: 30`. Two things need a host, both registered in `lib/index.js`'s `apply()`:
 
 - **DeepSeek balance** comes from DSH's own account remote (`remote.account.getBalance`), reusing the session you are already signed into. The plugin never touches credentials.
-- **WorkBuddy credits** come from one same-origin `fetch` to `/plugins/dsh-workbuddy-connect/status`, reading `credits.total`. That route is served by the `dsh-workbuddy-connect` host half; this plugin never calls WorkBuddy directly.
+- **WorkBuddy credits** are read straight from the WorkBuddy desktop app, without going through `dsh-workbuddy-connect`. The browser `fetch`es this plugin's loopback route `/plugins/dsh-dual-balance/workbuddy-credits` (the international variant is `…/ai`); the host locates the sign-in document, decrypts the AES-256-GCM `accessToken` envelope with the at-rest key the WorkBuddy binary exposes, then calls WorkBuddy's billing API with a `Bearer` token and sums each package's `…Precise` remaining value.
 
-It renders into the `sidebar.footer.action` slot at `order: 30`.
-
-**Privacy**: no telemetry, no files written, no network traffic beyond the two same-origin endpoints above. The two numbers move only between your machine and DSH itself.
+**Privacy**: no telemetry. The decryption key and access token stay in the host process's memory and are never written to disk; the only network requests the plugin makes are to WorkBuddy's own billing API. The two numbers move only between your machine and DSH / WorkBuddy.
 
 ## Uninstall
 

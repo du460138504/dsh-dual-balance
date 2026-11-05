@@ -15,7 +15,7 @@
 
 ## 为什么需要它
 
-DSH 里通常同时挂着两套账号：DSH 自己的 DeepSeek 官方账号（走官方计费），以及通过 [dsh-workbuddy-connect](https://github.com/corrinehu/dsh-workbuddy-connect) 接入的 WorkBuddy 账号（走 App 的积分）。两边余额分散在不同设置页里，日常使用中很容易跑到一半才发现某一边见底。
+DSH 里通常同时挂着两套账号：DSH 自己的 DeepSeek 官方账号（走官方计费），以及磁盘上 WorkBuddy 桌面端的账号（走 App 的积分）。两边余额分散在不同设置页里，日常使用中很容易跑到一半才发现某一边见底。
 
 本插件把这两个数字固定放在侧栏底部，每 60 秒刷新一次。
 
@@ -26,7 +26,7 @@ DSH 里通常同时挂着两套账号：DSH 自己的 DeepSeek 官方账号（�
 - **两个数字并排**：`DeepSeek` 显示官方余额（含赠金时显示为 `¥8.91 +¥2.00`），`WorkBuddy` 显示剩余积分合计。
 - **中英双语**：跟随 DSH 的语言设置自动切换。
 - **悬停看详情**：鼠标停在区块上，tooltip 给出完整说明——充值余额与赠金的拆分、WorkBuddy 积分来源、未登录状态等。
-- **优雅降级**：WorkBuddy 插件没装、没登录，或计费接口报错时，对应一行显示 `未登录` 或 `—`，不影响另一半正常显示，也**不会让 DSH 启动失败**。
+- **优雅降级**：WorkBuddy 桌面 App 没装时该行不出现；装了但没登录显示 `未登录`；登录了但计费接口报错则显示 `—`。任何情况都不影响 DeepSeek 一行，也**不会让 DSH 启动失败**。
 - **金额格式对齐官方**：见下方「格式细节」。
 
 ## 格式细节
@@ -35,13 +35,13 @@ DSH 里通常同时挂着两套账号：DSH 自己的 DeepSeek 官方账号（�
 
 **DeepSeek 余额**按官方的两位小数截断（`roundDown`）显示，不是四舍五入。余额 `0.148` 在官方页面显示 `0.14`，本插件也显示 `¥0.14`，不会显示成 `0.15`。不足一分的余额收敛显示为 `<¥0.01`——因为屏幕上的 `¥0.00` 会被误读成「已用尽」，而实际还差一点点。
 
-**WorkBuddy 积分**同样按两位小数截断。上游本就以两位小数上报，多出来的位数是二进制浮点噪声，所以这里只截断不舍入——**绝不显示尚未发放的积分**。
+**WorkBuddy 积分**同样按两位小数截断。计费接口对每份套餐同时给出整数字段和 `…Precise` 全精度字段；本插件汇总的是精确值，再截断到两位——截断而非四舍五入，**绝不显示尚未发放的积分**。
 
 两处都基于十进制字符串运算，避开二进制浮点的舍入偏差。
 
 ## 安装
 
-前置：已安装 DeepSeek Harness。**不装 `dsh-workbuddy-connect` 也能用**——那样只会显示 DeepSeek 余额，WorkBuddy 一行显示 `—`。
+前置：已安装 DeepSeek Harness。**不再需要 `dsh-workbuddy-connect`**——插件自己直读 WorkBuddy 桌面端的登录凭据与计费接口。
 
 ```sh
 # Desktop profile
@@ -67,20 +67,18 @@ dsh plugin --profile desktop add git+https://github.com/du460138504/dsh-dual-bal
 
 | 插件版本 | 要求的 DSH 核心 | 可选依赖 |
 |---|---|---|
-| `0.1.1`（当前） | `0.2.0-rc.2` | `dsh-workbuddy-connect`（可选，缺失时降级） |
+| `0.1.7`（当前） | `0.2.0-rc.2` | 无（自取凭据与计费，不依赖 `dsh-workbuddy-connect`） |
 
-插件只依赖两个 DSH 客户端能力——账户余额 remote 与侧栏 slot，都是 DSH 的稳定公开接口，不读取私有文件、不注入 hook。
+浏览器侧只使用两个 DSH 客户端能力——账户余额 remote 与侧栏 slot，都是 DSH 的稳定公开接口。宿主侧为取积分会读取 WorkBuddy 桌面端的登录文档并调用其计费接口，这是该行数据的唯一来源。
 
 ## 工作原理
 
-整个功能都在浏览器侧，宿主半边 `lib/index.js` 的 `apply()` 是**故意留空**的——它存在只是因为 profile bundle 需要通过 patch 挂载，需要一个挂载点。
+渲染在侧栏的 `sidebar.footer.action` slot，`order: 30`。两件事需要宿主，都在 `lib/index.js` 的 `apply()` 里注册：
 
 - **DeepSeek 余额**：通过 DSH 自己的账户 remote（`remote.account.getBalance`）读取，复用你已登录的账号，插件本身不接触任何凭据。
-- **WorkBuddy 积分**：向同源的 `/plugins/dsh-workbuddy-connect/status` 路由发起一次 `fetch`，读取其中的 `credits.total`。这条路由由 `dsh-workbuddy-connect` 宿主半边提供，插件不直接调用 WorkBuddy 的接口。
+- **WorkBuddy 积分**：插件自己直读 WorkBuddy 桌面端，不经过 `dsh-workbuddy-connect`。浏览器向本插件的 loopback 路由 `/plugins/dsh-dual-balance/workbuddy-credits`（国际版为 `…/ai`）发起一次 `fetch`；host 侧定位登录文档，若 `accessToken` 是 AES-256-GCM 信封就用 WorkBuddy 自带二进制暴露的 at-rest 密钥解密，再以 `Bearer` 调 WorkBuddy 计费接口，汇总各套餐 `…Precise` 的剩余值。
 
-渲染在侧栏的 `sidebar.footer.action` slot，`order: 30`。
-
-**隐私**：插件不发送任何遥测，不写入文件，不访问除上述两个同源接口以外的网络地址。两个数字只在你的机器与 DSH 自身之间流动。
+**隐私**：插件不发送任何遥测。解密密钥与 access token 只留在 host 进程内存，不落盘；插件发起的唯一网络请求是 WorkBuddy 自己的计费接口。两个数字只在你的机器与 DSH / WorkBuddy 之间流动。
 
 ## 卸载
 
